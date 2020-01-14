@@ -8,18 +8,10 @@ let scene;
 let renderer;
 let camera;
 let directionalLight;
-let fog;
 let axesHelper;
-//geometry variables
-let sphereGeometry;
-let sphereMaterial;
-let sphere;
-let squareGeometry;
-let squareMaterial;
-let square;
-let ringGeometry;
-let ringMaterial;
-let ring;
+let control;
+//Geometry
+let sphere
 
 //define javascript functions
 
@@ -32,9 +24,13 @@ function init() {
     //set its size
     renderer.setSize(window.innerWidth, window.innerHeight);
     //set the color
-    renderer.setClearColor(0xffffff);
+    renderer.setClearColor(0x00ff00);
     //add it to the DOM
     document.body.appendChild(renderer.domElement);
+    //create axes
+    axesHelper = new THREE.AxesHelper(20);
+    scene.add(axesHelper);
+
 }
 
 //createCameraAndLights
@@ -57,41 +53,38 @@ function createCameraAndLights() {
 
 //createGeometry
 function createGeometry() {
-    //create axes
-    axesHelper = new THREE.AxesHelper(10);
-    scene.add(axesHelper);
-    //create sphere
-    sphereGeometry = new THREE.SphereGeometry(3, 32, 8, 0, 6.3, 0,3);
-    sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x00FF00 });
-    sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    sphere.position.set(10, 10, 10);
+
+    //plane
+    let mat = new THREE.MeshBasicMaterial({ color: 0x089000 });
+    let geo = new THREE.PlaneGeometry(69, 20);
+    let mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -0.5*Math.PI;
+    scene.add(mesh);
+    //sphere
+    mat = new THREE.MeshLambertMaterial({ color: 0xff0000, wireframe: true });
+    geo = new THREE.SphereGeometry(7, 17, 17);
+    sphere = new THREE.Mesh(geo, mat);
+    sphere.position.set(10, 5, 0);
     scene.add(sphere);
-    //create box
-    squareGeometry = new THREE.BoxGeometry(7, 7, 7);
-    squareMaterial = new THREE.MeshBasicMaterial({ color: 0x00FF00 });
-    square = new THREE.Mesh(squareGeometry, squareMaterial);
-    square.position.set(-10, -10, -10);
-    scene.add(square);
-    //create ring
-    ringGeometry = new THREE.RingGeometry(4, 5, 32);
-    ringMaterial = new THREE.MeshLambertMaterial({ color: 0x00FF00, side: THREE.DoubleSide });
-    ring = new THREE.Mesh(ringGeometry, ringMaterial);
-    ring.position.set(-10, 10, -10);
-    scene.add(ring);
-    //create fog
-    const color = 0xFFFFFF;  // white
-    const near = 4;
-    const far = 100;
-    scene.fog = new THREE.Fog(color, near, far);
 }
 
-
-
+function setupDatgui() {
+    //the object that is used by dat.GUI
+    control = new function () {
+        this.sphereHeight = 0;
+        this.sphereSize = 5;
+    }
+    let gui = new dat.GUI();
+    gui.add(control, 'sphereHeight', -5, 15);
+    gui.add(control, 'sphereSize', 1, 20);
+}
 
 //render
 function render() {
     // render using requestAnimationFrame
     requestAnimationFrame(render);
+    sphere.position.y = control.sphereHeight;
+    sphere.scale = control.sphereSize;
     renderer.render(scene, camera);
 
 }
@@ -101,6 +94,7 @@ window.onload = function () {
     this.init();
     this.createCameraAndLights();
     this.createGeometry();
+    setupDatgui();
     this.render();
 }
 
