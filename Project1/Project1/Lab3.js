@@ -56,8 +56,8 @@ function init() {
         //add it to the DOM
         document.body.appendChild(renderer.domElement);
         //create axes
-        axesHelper = new THREE.AxesHelper(20);
-        scene.add(axesHelper);
+        //axesHelper = new THREE.AxesHelper(20);
+        //scene.add(axesHelper);
 
 }
 
@@ -97,7 +97,7 @@ function createCameraAndLights() {
 
         //SpotLight
         spotLight = new THREE.SpotLight(spotLightColor, 5.0);
-        spotLight.position.set( 0, 5, 0 );
+        spotLight.position.set( 2, 3, 0 );
         spotLight.castShadow = true;
         //scene.add(spotLight);
 
