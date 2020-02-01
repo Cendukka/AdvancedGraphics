@@ -1,4 +1,4 @@
-﻿///<reference path="libs/three.js"/>
+﻿///<reference path="../libs/three.js"/>
 //Author: Samuli Lehtonen
 //Date: January 17, 2020
 //Filename: 02-experiment-with-dat-gui.js

@@ -1,5 +1,5 @@
-///<reference path="libs/three.js"/>
-///<reference path="libs/rectAreaLightUniformsLib.js"/>
+///<reference path="../libs/three.js"/>
+///<reference path="../libs/rectAreaLightUniformsLib.js"/>
 //Author: Samuli Lehtonen
 //Date: January 24, 2020
 //Filename: 02-experiment-with-dat-gui.js
@@ -10,6 +10,7 @@ let scene;
 let renderer;
 let camera;
 let controls;
+let stats;
 //lights
 let directionalLight;
 let ambientLight;
@@ -59,6 +60,11 @@ function init() {
         //axesHelper = new THREE.AxesHelper(20);
         //scene.add(axesHelper);
 
+
+        //create stats
+        stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
 }
 
 //createCameraAndLights
@@ -223,6 +229,8 @@ function setupDatgui() {
 
 //render
 function render() {
+        stats.begin();
+        stats.end();
         // render using requestAnimationFrame
         requestAnimationFrame(render);
         renderer.render(scene, camera);
