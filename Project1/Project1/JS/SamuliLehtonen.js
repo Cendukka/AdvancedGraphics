@@ -33,13 +33,6 @@ let cube;
 let angle = 0;
 let sceneAngle = 0;
 
-//array for rotation angles
-let spokeRotationAngles = [];
-//push angles to the array
-for(let i = 0; i<=360;i+=30){
-    spokeRotationAngles.push(i);
-}
-
 //define javascript functions
 
 //init
