@@ -11,40 +11,38 @@ let camera;
 let controls;
 let stats;
 //lights
-let directionalLight;
-let hemiSphereSkyLight;
-let hemiSphereGroundLight;
+let spotLight;
 //lights' colors
-let directionalLightColor = 0x404040;
-let hemiSphereSkyLightColor = 0x0000ff;
-let hemiSphereGroundLightColor = 0x00ff00;
+let spotLightColor = 0x404040;
 
-
-let axesHelper;
 let control;
 
 //Geometry
-let ferrisWheel;
-let baseContainer, wheelContainer, wheelContainerChild, spokeContainer,spokeContainerChild,
+let baseContainer, wheelContainer, wheelContainerPlaceholder,ferrisWheelContainer, spokeContainer,spokeContainerChild,
     casketContainer,casketContainerChild;
-let axle;
-let plane;
-let spoke;
-let wheelAmount = 1;
-let numberOfSpokes = 1;
+    //objects
+let axle,plane,spoke,rimMesh,casketHolderSpoke, casket;
+//arrays for objects
+let spokeArr = [];
+let casketArr = [];
+let rimMeshArr = [];
+let ferrishWheelArr = [];
+let axleArray = [];
+//initial parameters for the ferris wheel
+let wheelAmount = 3;
+let numberOfSpokes = 14;
 let outerRadiusRim = 10;
 let innerRadiusRim = 9;
 let xPosition = 0;
 let yPosition = 0; 
 let zPosition = 0;
+let axleRadius = 2;
+let spokeLength = 13.5;
+let wheelRadius = 20;
 
-//rotation angle
-let wheelAngle = 0;
-let spokeAngle = 0;
+//Scene rotation angle
 let sceneAngle = 0;
-let casketAngle = 0;
 
-let distanceBetweenWheels = 10;
 
 //define javascript functions
 
@@ -63,10 +61,6 @@ function init() {
     renderer.shadowMap.enabled = true;
     //add it to the DOM
     document.body.appendChild(renderer.domElement);
-    //create axes
-    //axesHelper = new THREE.AxesHelper(20);
-    //scene.add(axesHelper);
-
 
     //create stats
     stats = new Stats();
@@ -81,10 +75,10 @@ function createCameraAndLights() {
         60,                                         //camera angle
         window.innerWidth / window.innerHeight,     //shape of the output
         0.1,                                        //near point
-        10000                                         //far point
+        1000                                         //far point
     );
     //set its position
-    camera.position.set(0, 30, 50);
+    camera.position.set(0, 40, 80);
     //point the camera
     camera.lookAt(scene.position);
     controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -93,18 +87,14 @@ function createCameraAndLights() {
     //lights
 
     //Directional light
-    directionalLight = new THREE.DirectionalLight(directionalLightColor, 3.0);
-    directionalLight.position.set(20, 30, 10);
-    directionalLight.receiveShadow = true;
-    directionalLight.castShadow = true
-    directionalLight.shadow.camera.top = -30
-    directionalLight.shadow.camera.right = 30
-    directionalLight.shadow.camera.left = -30
-    directionalLight.shadow.camera.bottom = 30
-    let directionalLightHelper = new THREE.DirectionalLightHelper(directionalLight);
-    directionalLight.add(directionalLightHelper)
-    directionalLight.visible = true;
-    scene.add(directionalLight);
+    spotLight = new THREE.SpotLight(spotLightColor, 3.0);
+    spotLight.position.set(0, 50, 0);
+    spotLight.receiveShadow = true;
+    spotLight.castShadow = true
+    spotLight.visible = true;
+    
+    scene.add(spotLight);
+    
 }
 
 //createGeometry
@@ -116,18 +106,20 @@ function createGeometry() {
     plane.rotation.x = -0.5 * Math.PI;
     plane.receiveShadow = true;
     scene.add(plane);
-    //plane.add(hemiSphereLight);
     //create containers
     createContainers();
     //creates wheels and attaches them to variable after created
-    createWheel(wheelAmount,numberOfSpokes,10,9,0,0,2);
+    createWheel(wheelAmount,numberOfSpokes,outerRadiusRim,innerRadiusRim,xPosition,yPosition,zPosition);
+    
    
 }
 
 function createContainers(){
     //Create the base container to hold the objects
     baseContainer = new THREE.Object3D();
-    baseContainer.position.set(0, 15, 0);
+    baseContainer.position.set(0, 25, 0);
+    baseContainer.rotation.x = Math.PI;
+    baseContainer.rotation.y =Math.PI;
     scene.add(baseContainer);
 
     //create the wheelContainer to hold wheels' child containers
@@ -135,43 +127,38 @@ function createContainers(){
     wheelContainer.position.set(0, 0, 0);
     baseContainer.add(wheelContainer);
 
-    //create the wheelContainerChild to hold wheels
-    wheelContainerChild = new THREE.Object3D();
-    wheelContainerChild.position.set(0, 0, 0);
-    wheelContainer.add(wheelContainerChild);
+    
 
-    //create the spokeContainer to hold spokes's child containers
-    spokeContainer = new THREE.Object3D();
-    spokeContainer.position.set(0, 0, 0);
-    wheelContainerChild.add(spokeContainer);
-
-    //create the wheelContainer to hold casket's child containers
-    spokeContainerChild = new THREE.Object3D();
-    spokeContainerChild.position.set(0,0,0);
-    spokeContainer.add(spokeContainerChild);
 }
 
 function createWheel(numberOfFerrisWheels,numberOfSpokes,outerRadiusRim,innerRadiusRim,xPositionRim,yPositionRim,zPositionRim){
-    //check if wheelcontainer doesn't have child
-   if(wheelContainer.wheelContainerChild == undefined){
-    //add the wheelContainerChild to hold wheels
-    wheelContainerChild = new THREE.Object3D();
-    wheelContainerChild.position.set(0, 0, 0);
-    wheelContainer.add(wheelContainerChild);
+   
+  
+    //create the wheelContainerPlaceholder to hold ferris wheel containers
+    wheelContainerPlaceholder = new THREE.Object3D();
+    wheelContainerPlaceholder.position.set(0, 0, 0);
+    wheelContainer.add(wheelContainerPlaceholder);
 
-   }
+   
 
-    for(let w = 0; w<numberOfFerrisWheels*distanceBetweenWheels; w+=distanceBetweenWheels){
+    for(let w = 1; w<=numberOfFerrisWheels; w++){
+
+    //create the ferris wheel container to hold wheels
+        ferrisWheelContainer = new THREE.Object3D();
+        ferrisWheelContainer.position.set(randomInt(-35,35), 0, randomInt(-35,35));
+        wheelContainerPlaceholder.add(ferrisWheelContainer);
+        ferrishWheelArr.push(ferrisWheelContainer);
 
         //create the cylinder for the wheel
-        let geo = new THREE.CylinderGeometry( 2, 2, 8, 32 );
+        let geo = new THREE.CylinderGeometry( axleRadius, axleRadius, 8, 32 );
         let mat = new THREE.MeshLambertMaterial({ color: 0xbb0000 });
         axle = new THREE.Mesh(geo, mat);
-        axle.position.set(0,0,w);
-        axle.rotation.x=Math.PI/2;
+        axle.position.set(0,0,4.5);
+        axle.rotation.x=Math.PI*0.5;
         axle.castShadow = true;
         axle.receiveShadow = true;
-        wheelContainerChild.add(axle);
+        ferrisWheelContainer.add(axle);
+        axleArray.push(axle);
 
         
         //create absellipse
@@ -196,21 +183,22 @@ function createWheel(numberOfFerrisWheels,numberOfSpokes,outerRadiusRim,innerRad
         //create the ExtrudeGeometry
         geo = new THREE.ExtrudeGeometry(absellipse, extrudeSettings);
         mat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-        let rimMesh = new THREE.Mesh(geo, mat);
+        rimMesh = new THREE.Mesh(geo, mat);
         rimMesh.castShadow = true;
         rimMesh.receiveShadow = true;
-        wheelContainerChild.add(rimMesh);
-        rimMesh.position.set(xPositionRim,yPositionRim,zPositionRim+w);
+        ferrisWheelContainer.add(rimMesh);
+        rimMesh.position.set(xPositionRim,yPositionRim,zPositionRim+1);
+        rimMeshArr.push(rimMesh);
 
         //Create and rotate the spokes
         let rotationMultiplier = 1;
         for(let y = 0; y<numberOfSpokes; y++){
-            createSpokesAndCaskets(Math.PI*rotationMultiplier,xPositionRim,yPositionRim,zPositionRim+w);
+            createSpokesAndCaskets(Math.PI*rotationMultiplier,xPositionRim,yPositionRim,zPositionRim+1);
             rotationMultiplier -= 2/numberOfSpokes;
             
         }
     }
-
+    
 }
   
 //function that creates Spokes
@@ -219,16 +207,17 @@ function createSpokesAndCaskets(rotationAngle,xPositionSpoke,yPositionSpoke,zPos
   //create the spokeContainer to hold spokes's child containers
   spokeContainer = new THREE.Object3D();
   spokeContainer.position.set(0, 0, 0);
-  wheelContainerChild.add(spokeContainer);
+  ferrisWheelContainer.add(spokeContainer);
 
-  //create the wheelContainer to hold casket's child containers
+  //create the spokecontainerchild to hold caskets
   spokeContainerChild = new THREE.Object3D();
   spokeContainerChild.position.set(0,0,0);
+  
   spokeContainer.add(spokeContainerChild);
 
     
-
-    let geometry = new THREE.BoxGeometry( 1, 13.5, 0.5, 32,32,32 );
+    //Create spoke
+    let geometry = new THREE.BoxGeometry( 1, spokeLength, 0.5, 32,32,32 );
     geometry.translate(0.5,5,0);
     let material = new THREE.MeshNormalMaterial();
     spoke = new THREE.Mesh( geometry, material );
@@ -236,63 +225,102 @@ function createSpokesAndCaskets(rotationAngle,xPositionSpoke,yPositionSpoke,zPos
     spoke.rotation.z = rotationAngle;
     spoke.castShadow = true;
     spoke.receiveShadow = true;
-    //spoke.add(casketContainer);
     spokeContainerChild.add(spoke);
+    spokeArr.push(spoke);
     
-
+    //Create the spoke for the casket holder, the casketholder and the casket
     geometry = new THREE.BoxGeometry( 0.5, 5, 0.5, 32,32,32 );
     material = new THREE.MeshNormalMaterial();
     casketSpoke = new THREE.Mesh( geometry, material );
-    casketSpoke.position.set(xPositionSpoke, yPositionSpoke+11.5,2.5)
+    casketSpoke.position.set(0.5, yPositionSpoke+11.5,2.5)
     casketSpoke.rotation.x = Math.PI*0.5;
+    casketSpoke.rotation.y = -rotationAngle;
     casketSpoke.castShadow = true;
     casketSpoke.receiveShadow = true;
-    //casketContainerChild.add(casketSpoke);
-
-
-    geometry = new THREE.BoxGeometry( 0.5, 5, 0.5, 32,32,32 );
+    spoke.add(casketSpoke);
+    
+    geometry = new THREE.BoxGeometry( 0.5, 3, 0.5, 32,32,32 );
     material = new THREE.MeshNormalMaterial();
-    let casketHolder = new THREE.Mesh( geometry, material );
-    casketHolder.position.set(0, 0,2.5)
-    casketHolder.rotation.x = Math.PI*0.5;
+    casketHolderSpoke = new THREE.Mesh( geometry, material );
+    casketHolderSpoke.position.set(0, 0,-1.5)
+    casketHolderSpoke.rotation.x = Math.PI*0.5;
+    casketHolderSpoke.castShadow = true;
+    casketHolderSpoke.receiveShadow = true;
+    casketSpoke.add(casketHolderSpoke);
 
-    // casketSpoke.add(casketHolder);
-    // casketContainer.add(casketSpoke);
-    // spoke.add(casketContainer);
-    // spokeContainer.add(spoke);
-    // wheelContainerChild.add( spokeContainer );
-    // wheelcontainer.add(wheelContainerChild);
+    geometry = new THREE.SphereGeometry(1,32,32,0,Math.PI*2,0,2)
+    material = new THREE.MeshLambertMaterial({color: 0xff0000});
+    casket = new THREE.Mesh(geometry, material);
+    casket.position.set(0,-1,0);
+    casket.rotation.x = Math.PI;
+    casket.castShadow = true;
+    casket.receiveShadow = true;
+    casketHolderSpoke.add(casket);
+
+    casketArr.push(casketSpoke);
+   
 }
 
-
+function randomInt(min, max){
+    return Math.floor(Math.random() * (max-min+1))+min;
+}
 
 
 function setupDatgui() {
     //the object that is used by dat.GUI
     control = new function () {
-        this.OuterRadiusRim = 1;
-        this.InnerRadiusRim = 1;
+        this.OuterRadiusRim = outerRadiusRim;
+        this.InnerRadiusRim = innerRadiusRim;
         this.RimWidth = 1;
         this.AxleRadius = 1;
         this.SpokeLength = 1;
         this.NumberOfSpokes = numberOfSpokes;
         this.ToggleSceneRotation = false;
-        this.ToggleWheelRotation = true;
+        this.ToggleWheelRotation = false;
 
 
     }
     let gui = new dat.GUI();
 
-    gui.add(control, "OuterRadiusRim");
-    gui.add(control, "InnerRadiusRim");
-    gui.add(control, "RimWidth");
-    gui.add(control, "AxleRadius");
-    gui.add(control, "SpokeLength");
+    gui.add(control, "OuterRadiusRim",5,15,1)
+            .onChange((e) => {
+                outerRadiusRim = e;
+            });
+    gui.add(control, "InnerRadiusRim", 1,15,1)
+            .onChange((e) => {
+                innerRadiusRim = e;
+            });
+    gui.add(control, "RimWidth",0.1,2,0.1)
+            .onChange((e) => {
+                wheelContainer.scale.x = e;
+                wheelContainer.scale.y = e;
+                wheelContainer.scale.z = e;
+            });;
+    gui.add(control, "AxleRadius",0.1,2,0.1)
+            .onChange((e) => {
+                axleArray.forEach(element => {
+                    element.scale.x = e;
+                    element.scale.y = e;
+                    element.scale.z = e;
+                });
+               
+            });
+    gui.add(control, "SpokeLength",0.5,2,0.1)
+            .onChange((e) => {
+                spokeArr.forEach(element => {
+                    element.scale.y = e;
+                });;
+            });
     gui.add(control, "NumberOfSpokes",1,20,1)
-            .onChange(() => {
-                wheelContainer.remove(wheelContainerChild);
-
-                createWheel(wheelAmount,control.NumberOfSpokes,10,9,0,0,2);
+            .onChange((e) => {
+                numberOfSpokes = e;
+                //clean the arrays and remove the container to make new
+                wheelContainer.remove(wheelContainerPlaceholder);
+                casketArr = [];
+                spokeArr = [];
+                rimMeshArr = [];
+                wheelAngle = 0;
+                createWheel(wheelAmount,numberOfSpokes,outerRadiusRim,innerRadiusRim,xPosition,yPosition,zPosition);
             });
     gui.add(control, "ToggleSceneRotation");
     gui.add(control, "ToggleWheelRotation");
@@ -307,11 +335,16 @@ function render() {
     if (control.ToggleSceneRotation) {
         scene.rotation.y = sceneAngle += 0.02;
     }
-     //Rotation of the wheels//
+     //Rotation of the wheel and caskets//
     if (control.ToggleWheelRotation) {
-        wheelContainer.rotation.z = wheelAngle += 0.02;
-        //spokeContainer.rotation.z = spokeAngle += 0.02;
-        //casketSpoke.rotation.y = casketAngle -=0.02;
+        ferrishWheelArr.forEach(element => {
+            element.rotation.z += 0.02;  
+        });
+        
+        casketArr.forEach(element => {
+            element.rotation.y -=0.02;
+        });
+        
     }
     // render using requestAnimationFrame
     requestAnimationFrame(render);
