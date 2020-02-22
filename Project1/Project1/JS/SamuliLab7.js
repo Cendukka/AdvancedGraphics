@@ -2,7 +2,7 @@
 ///<reference path="../libs/rectAreaLightUniformsLib.js"/>
 //Author: Samuli Lehtonen
 //Date: February 21, 2020
-//Filename: Samuli.js
+//Filename: SamuliLab7.js
 
 //declare recurrent variables
 let scene;
@@ -126,11 +126,10 @@ function mouseDownHandler(event){
     raycaster.setFromCamera(mouse, camera);
 // get intersections and loop through them
     let intersections = raycaster.intersectObjects(planeArr);
-    intersections.some(element => {
-        //create the cube
-        createTheCube(element);
+    if(intersections[0]){
+        createTheCube(intersections[0]);
+    }
     
-    });
 }
 
 function createTheCube(clickedElement){
@@ -147,7 +146,7 @@ function createTheCube(clickedElement){
     boxMesh.position.z = elementZ;
     scene.add(boxMesh);
 
-    //relocate the object clicked(plane)
+    //relocate the clicked object (plane)
     clickedElement.object.position.y += 1;
 }
 
