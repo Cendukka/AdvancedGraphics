@@ -5,7 +5,7 @@
 //Filename: 02-experiment-with-dat-gui.js
 
 
-//declare recurrent variables
+//declare recurrent letiables
 let scene;
 let renderer;
 let camera;
@@ -245,3 +245,24 @@ window.onload = function () {
         this.render();
 }
 
+
+
+
+
+//new THREE.BoxGeometry(width, height, depth, widthSegments = 1, heightSegments = 1, depthSegments = 1)
+//new THREE.SphereGeometry(radius, horizontalSegments = 8, verticalSegments = 6)
+//new THREE.CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments = 8, heightSegments = 1, openEnded = false)
+/*
+let x = 0, y = 0;
+let heartShape = newTHREE.Shape();
+heartShape.moveTo( x + 5, y + 5 );
+heartShape.bezierCurveTo( x + 5, y + 5, x + 4, y, x, y );
+heartShape.bezierCurveTo( x - 6, y, x - 6, y + 7,x - 6, y + 7 );
+heartShape.bezierCurveTo( x - 6, y + 11, x - 3, y + 15.4, x + 5, y + 19 );
+heartShape.bezierCurveTo( x + 12, y + 15.4, x + 16, y + 11, x + 16, y + 7 );
+heartShape.bezierCurveTo( x + 16, y + 7, x + 16, y, x + 10, y );
+heartShape.bezierCurveTo( x + 7, y, x + 5, y + 5, x + 5, y + 5 );
+let geometry = new THREE.ShapeGeometry( heartShape );
+let material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+let mesh = new THREE.Mesh( geometry, material ) ;
+*/
