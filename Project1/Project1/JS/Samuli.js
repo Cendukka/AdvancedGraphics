@@ -1,46 +1,45 @@
 ///<reference path="../libs/three.js"/>
 ///<reference path="../libs/rectAreaLightUniformsLib.js"/>
 //Author: Samuli Lehtonen
-//Date: March 06 2020
+//Date: March 27 2020
 //Filename: Samuli.js
 
-//declare recurrent variables
-let scene;
-let renderer;
-let camera;
-let controls;
-let axesHelper;
+//declare variables
+let scene, renderer, camera, controls, axesHelper;
 //lights
-let spotLight, hemisphereLight, directionalLight;
+let spotLight, ambientLight;
 //lights' colors
-let directionalLightColor = 0x404040;
-let spotLightColor = 0x404040;
-let hemisphereLightSkyColor = 0x0000ff;
-let hemisphereLightGroundColor = 0x00ff00;
-
+let spotLightColor = 0x404040, ambientLightColor = 0x404040;
+//datGui
 let control;
-//textures
-let cubeTexture,alpha, normal, shiny;
-//Skybox
-let skyboxLoader;
-
-//Materials
-let planeMat, mat_transparent, mat_textured, mat_reflective;
-//Geometry
-let planeGeo, transparentSphereGeo, shinySphereGeo,reflectiveCubeGeo,glassCubeGeo;
-//Meshes
-let plane,transparentSphere,shinySphere,reflectiveCube,glassCube;
-
 //Scene rotation angle
 let sceneAngle = 0;
+//Shader variables
+const clock = new THREE.Clock();
+const __shaderA = Shaders.ShaderA;
+const __shaderB = Shaders.ShaderB;
+const __shaderC = Shaders.ShaderC;
+const __shaderD = Shaders.ShaderD;
 
+//materials
+let planeMat, knotMat1,knotMat2, boxMat1, boxMat2
+//geometries
+let planeGeo, knotGeo1,knotGeo2, boxGeo1, boxGeo2;
+//meshes
+let plane, knot1, knot2, box1, box2;
+//javascript function to drive your scene
+window.onload = function () {
+    this.init();
+    this.createCameraAndLights();
+    this.createGeometry();
+    this.setupDatgui();
+    this.render();
+}
 
-//define javascript functions
-
-//init
-function init() {
+function init(){
     //create the scene
     scene = new THREE.Scene();
+
     //create the renderer
     renderer = new THREE.WebGLRenderer();
     //set its size
@@ -50,10 +49,8 @@ function init() {
     renderer.shadowMap.enabled = true;
     //add it to the DOM
     document.body.appendChild(renderer.domElement);
-}
-
-//createCameraAndLights
-function createCameraAndLights() {
+};
+function createCameraAndLights(){
     //create the camera
     camera = new THREE.PerspectiveCamera(
         60,                                         //camera angle
@@ -70,141 +67,115 @@ function createCameraAndLights() {
     scene.add(axesHelper);
 
     //lights
-
-    //Directional light
-    spotLight = new THREE.SpotLight(spotLightColor, 4.0);
+    spotLight = new THREE.SpotLight(spotLightColor, 1.0);
     spotLight.position.set(0, 45, 0);
     spotLight.receiveShadow = true;
     spotLight.castShadow = true;
-    spotLight.visible = false;
+    spotLight.visible = true;
     scene.add(spotLight);
 
-    //Directional light
-    directionalLight = new THREE.DirectionalLight(directionalLightColor, 1.0);
-    directionalLight.position.set(0, 45, 0);
-    directionalLight.receiveShadow = true;
-    directionalLight.castShadow = true;
-    scene.add(directionalLight);
-
-    //Hemissphere light
-    hemisphereLight = new THREE.HemisphereLight(hemisphereLightSkyColor, hemisphereLightGroundColor, 1);
-    hemisphereLight.position.set(0,100,0);
-    scene.add(hemisphereLight);
-}
-
-function loadTextures(){
-    alpha = new THREE.TextureLoader().load( '../assets/textures/alpha/transparency.png' );
-    normal = new THREE.TextureLoader().load( '../assets/textures/Engraved_Metal_003_NORM.jpg' );
-    shiny = new THREE.TextureLoader().load( '../assets/textures/Engraved_Metal_003_ROUGH.jpg' );
-}
-
-function createSkybox(){
-    skyboxLoader = new THREE.CubeTextureLoader().setPath( '../assets/textures/cubemap/park2/' );
-    //Skybox's images
-    let urls = [
-        'posx.jpg', //left
-        'negx.jpg', //right
-        'posy.jpg', //top
-        'negy.jpg', //bottom
-        'posz.jpg', //back
-        'negz.jpg' //front
-    ];
-    //Glass cube's images
-    let urls2= [
-        'negx.jpg',
-        'posx.jpg',
-        'negy.jpg',
-        'posy.jpg',
-        'negz.jpg',
-        'posz.jpg'
-    ];
-    cubeTexture = skyboxLoader.load(urls);
-    cubeTexture2 = skyboxLoader.load(urls2);
-
-    scene.background = cubeTexture;
-}
-
-//createGeometry
-function createGeometry() {
+    ambientLight = new THREE.AmbientLight(ambientLightColor, 1.0);
+    ambientLight.position.set(0, 45, 0);
+    ambientLight.receiveShadow = true;
+    ambientLight.castShadow = true;
+    ambientLight.visible = true;
+    scene.add(ambientLight);
+};
+function createGeometry(){
     //plane
     planeMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-    planeGeo = new THREE.PlaneGeometry(100, 100);
+    planeGeo = new THREE.PlaneBufferGeometry(100, 100);
     plane = new THREE.Mesh(planeGeo, planeMat);
     plane.rotation.x = -0.5 * Math.PI;
     plane.receiveShadow = true;
     scene.add(plane);
-    //Transparent sphere
-    mat_transparent = new THREE.MeshStandardMaterial({ alphaMap: alpha, alphaTest: 0.5});
-    transparentSphereGeo = new THREE.SphereGeometry(10,32,32);
-    transparentSphere = new THREE.Mesh(transparentSphereGeo, mat_transparent);
-    transparentSphere.position.set(25,15,-20);
-    transparentSphere.castShadow = true;
-    scene.add(transparentSphere);
-    //Shiny sphere
-    mat_textured = new THREE.MeshPhongMaterial({ envMap: cubeTexture, normalMap: normal});
-    mat_textured.shininessMap = shiny;
-    shinySphereGeo = new THREE.SphereBufferGeometry(10,32,32);
-    shinySphere = new THREE.Mesh(shinySphereGeo, mat_textured);
-    shinySphere.position.set(0,15,-20);
-    shinySphere.castShadow = true;
-    scene.add(shinySphere);
-    //reflective cube
-    mat_reflective = new THREE.MeshStandardMaterial({ envMap: cubeTexture, metalness: 1, roughness: 0});
-    reflectiveCubeGeo = new THREE.CubeGeometry(10,10,10);
-    reflectiveCube = new THREE.Mesh(reflectiveCubeGeo, mat_reflective);
-    reflectiveCube.position.set(-25,15,-20);
-    reflectiveCube.castShadow = true;
-    scene.add(reflectiveCube);
 
-    //glassCube
-    mat_reflective = new THREE.MeshPhongMaterial({ envMap: cubeTexture2, refractionRatio: 0.95, reflectivity: 0.8 });
-    mat_reflective.mapping = THREE.CubeRefractionMapping;
-    glassCubeGeo = new THREE.BoxBufferGeometry(10,10,10);
-    glassCube = new THREE.Mesh(glassCubeGeo, mat_reflective);
-    glassCube.position.set(0,15,20);
-    glassCube.castShadow = true;
-    scene.add(glassCube);
+    //box1
+    boxMat1 = new THREE.ShaderMaterial(
+        {
+            
+            vertexShader: __shaderA.vertexShader,
+            fragmentShader: __shaderA.fragmentShader,
+            transparent: true
+        });
+    boxGeo1 = new THREE.BoxBufferGeometry(10,10,10);
+    box1 = new THREE.Mesh(boxGeo1, boxMat1);
+    box1.position.set(20,20,-20);
+    box1.receiveShadow = true;
+    box1.castShadow = true;
+    scene.add(box1);  
+
+    //box2
+    boxMat2 = new THREE.ShaderMaterial(
+        {
+            uniforms: __shaderD.uniforms,
+            vertexShader: __shaderD.vertexShader,
+            fragmentShader: __shaderD.fragmentShader,
+            transparent: true
+        });
+    boxGeo2 = new THREE.BoxBufferGeometry(10,10,10);
+    box2 = new THREE.Mesh(boxGeo2, boxMat2);
+    box2.position.set(-20,20,20);
+    box2.receiveShadow = true;
+    box2.castShadow = true;
+    scene.add(box2);
+
+    //knot1
+    knotMat1 = new THREE.ShaderMaterial(
+        {
+            vertexShader: __shaderB.vertexShader,
+            fragmentShader: __shaderB.fragmentShader,
+            transparent: true
+        });
+    knotGeo1 = new THREE.TorusKnotGeometry(8, 3, 100, 16)
+    knot1 = new THREE.Mesh(knotGeo1, knotMat1);
+    knot1.position.set(20,20,20);
+    knot1.receiveShadow = true;
+    knot1.castShadow = true;
+    scene.add(knot1);
+
+    //knot2
+    knotMat2 = new THREE.ShaderMaterial(
+        {
+            uniforms: __shaderC.uniforms,
+            vertexShader: __shaderC.vertexShader,
+            fragmentShader: __shaderC.fragmentShader,
+            transparent: true
+        });
+    knotGeo2 = new THREE.TorusKnotGeometry(8, 3, 100, 16);
+    knot2 = new THREE.Mesh(knotGeo2, knotMat2);
+    knot2.position.set(-20,20,-20);
+    knot2.castShadow = true;
+    scene.add(knot2);
+};
+function setupDatgui(){
+ //the object that is used by dat.GUI
+ control = new function () {
+    this.ToggleSceneRotation = false;
+    this.SpotLight = false;
+    this.AmbientLight = true;
+
 }
-
-
-function setupDatgui() {
-    //the object that is used by dat.GUI
-    control = new function () {
-        this.ToggleSceneRotation = false;
-        this.SpotLight = false;
-        this.DirectionalLight = true;
-        this.HemisphereLight = true;
-
-    }
-    let gui = new dat.GUI();
-    gui.add(control, "ToggleSceneRotation");
-    gui.add(control, "SpotLight").onChange((e) => {
-        spotLight.visible = e;
-    })
-    gui.add(control, "DirectionalLight").onChange((e) => {
-        directionalLight.visible = e;
-    })
-}
-
-//render
-function render() {
+let gui = new dat.GUI();
+gui.add(control, "ToggleSceneRotation");
+gui.add(control, "SpotLight").onChange((e) => {
+    spotLight.visible = e;
+})
+gui.add(control, "AmbientLight").onChange((e) => {
+    ambientLight.visible = e;
+})
+};
+function render(){
     controls.update();
-   //Rotation of the scene//
-    if (control.ToggleSceneRotation) {
-        scene.rotation.y = sceneAngle += 0.02;
-    }
-    // render using requestAnimationFrame
-    requestAnimationFrame(render);
-    renderer.render(scene, camera);
-}
-
-//javascript function to drive your scene
-window.onload = function () {
-    this.init();
-    this.createCameraAndLights();
-    this.loadTextures();
-    this.createSkybox();
-    this.createGeometry();
-    this.setupDatgui();
-    this.render();
-}
+    //Rotation of the scene//
+     if (control.ToggleSceneRotation) {
+         scene.rotation.y = sceneAngle += 0.02;
+     }
+    
+    __shaderC.uniforms.time.value = clock.getElapsedTime();
+    
+    __shaderD.uniforms.time.value = clock.getElapsedTime();
+     // render using requestAnimationFrame
+     requestAnimationFrame(render);
+     renderer.render(scene, camera);
+};
