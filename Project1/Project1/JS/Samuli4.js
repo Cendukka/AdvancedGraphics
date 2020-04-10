@@ -1,8 +1,8 @@
 ///<reference path="../libs/three.js"/>
 ///<reference path="../libs/rectAreaLightUniformsLib.js"/>
 //Author: Samuli Lehtonen
-//Date: April 02 2020
-//Filename: Samuli.js
+//Date: March 30 2020
+//Filename: Samuli4.js
 
 //declare variables
 let scene, renderer, camera, controls, axesHelper;
@@ -19,13 +19,14 @@ const clock = new THREE.Clock();
 const __shaderA = Shaders.ShaderA;
 const __shaderB = Shaders.ShaderB;
 const __shaderC = Shaders.ShaderC;
+const __shaderD = Shaders.ShaderD;
 
 //materials
-let planeMat, knotMat, sphereMat
+let planeMat, knotMat1,knotMat2, boxMat, sphereMat
 //geometries
-let planeGeo, knotGeo1, sphereGeo;
+let planeGeo, knotGeo1,knotGeo2, boxGeo, sphereGeo;
 //meshes
-let plane, knot, sphere;
+let plane, knot1, knot2, box, sphere;
 //javascript function to drive your scene
 window.onload = function () {
     this.init();
@@ -79,55 +80,72 @@ function createCameraAndLights(){
     scene.add(ambientLight);
 };
 function createGeometry(){
-      //Sphere
-      sphereMat = new THREE.ShaderMaterial(
-        {
-            uniforms: __shaderA.uniforms,
-            vertexShader: __shaderA.vertexShader,
-            fragmentShader: __shaderA.fragmentShader,
-            transparent: true
-        });
-        sphereGeo = new THREE.SphereBufferGeometry(10,32,32);
-        sphere = new THREE.Mesh(sphereGeo, sphereMat);
-        sphere.position.set(-20,20,20);
-        sphere.receiveShadow = true;
-        sphere.castShadow = true;
-        scene.add(sphere);
     //plane
-    planeMat = new THREE.ShaderMaterial(
-        {
-            uniforms: __shaderB.uniforms,
-            vertexShader: __shaderB.vertexShader,
-            fragmentShader: __shaderB.fragmentShader,
-            transparent: true
-        });
-    planeGeo = new THREE.PlaneBufferGeometry(100, 100, 256,256);
+    planeMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    planeGeo = new THREE.PlaneBufferGeometry(100, 100);
     plane = new THREE.Mesh(planeGeo, planeMat);
     plane.rotation.x = -0.5 * Math.PI;
     plane.receiveShadow = true;
     scene.add(plane);
 
+    //box
+    boxMat = new THREE.ShaderMaterial(
+        {
+            
+            vertexShader: __shaderA.vertexShader,
+            fragmentShader: __shaderA.fragmentShader,
+            transparent: true
+        });
+    boxGeo = new THREE.BoxBufferGeometry(10,10,10);
+    box = new THREE.Mesh(boxGeo, boxMat);
+    box.position.set(20,20,-20);
+    box.receiveShadow = true;
+    box.castShadow = true;
+    scene.add(box);  
 
     //knot
-    knotMat = new THREE.ShaderMaterial(
+    knotMat1 = new THREE.ShaderMaterial(
     {
-        uniforms: __shaderC.uniforms,
-        vertexShader: __shaderC.vertexShader,
-        fragmentShader: __shaderC.fragmentShader,
+        vertexShader: __shaderB.vertexShader,
+        fragmentShader: __shaderB.fragmentShader,
         transparent: true
     });
     knotGeo1 = new THREE.TorusKnotGeometry(8, 3, 100, 16)
-    knot = new THREE.Mesh(knotGeo1, knotMat);
-    knot.position.set(20,20,20);
-    knot.receiveShadow = true;
-    knot.castShadow = true;
-    scene.add(knot);
+    knot1 = new THREE.Mesh(knotGeo1, knotMat1);
+    knot1.position.set(20,20,20);
+    knot1.receiveShadow = true;
+    knot1.castShadow = true;
+    scene.add(knot1);
+ 
 
-  
-    //loading textures
-    __shaderA.uniforms.textureA.value = new THREE.TextureLoader().load('../assets/textures/noise-perlin.jpg');
-    __shaderB.uniforms.textureA.value = new THREE.TextureLoader().load('../assets/textures/noise-perlin.jpg');
-    __shaderC.uniforms.textureA.value = new THREE.TextureLoader().load('../assets/textures/noise-perlin.jpg');
+    //knot2
+    knotMat2 = new THREE.ShaderMaterial(
+        {
+            uniforms: __shaderC.uniforms,
+            vertexShader: __shaderC.vertexShader,
+            fragmentShader: __shaderC.fragmentShader,
+            transparent: true
+        });
+    knotGeo2 = new THREE.TorusKnotGeometry(8, 3, 100, 16);
+    knot2 = new THREE.Mesh(knotGeo2, knotMat2);
+    knot2.position.set(-20,20,-20);
+    knot2.castShadow = true;
+    scene.add(knot2);
+
+    //Sphere
+    sphereMat = new THREE.ShaderMaterial(
+    {
+        uniforms: __shaderD.uniforms,
+        vertexShader: __shaderD.vertexShader,
+        fragmentShader: __shaderD.fragmentShader,
+        transparent: true
+    });
+    sphereGeo = new THREE.SphereBufferGeometry(10,32,32);
+    sphere = new THREE.Mesh(sphereGeo, sphereMat);
+    sphere.position.set(-20,20,20);
+    sphere.receiveShadow = true;
+    sphere.castShadow = true;
+    scene.add(sphere);
 };
 function setupDatgui(){
  //the object that is used by dat.GUI
@@ -153,9 +171,8 @@ function render(){
          scene.rotation.y = sceneAngle += 0.02;
      }
      //Pass the clock's time to shader uniform
-     __shaderA.uniforms.time.value = clock.getElapsedTime();
-     __shaderB.uniforms.time.value = clock.getElapsedTime();
     __shaderC.uniforms.time.value = clock.getElapsedTime();
+    __shaderD.uniforms.time.value = clock.getElapsedTime();
      // render using requestAnimationFrame
      requestAnimationFrame(render);
      renderer.render(scene, camera);

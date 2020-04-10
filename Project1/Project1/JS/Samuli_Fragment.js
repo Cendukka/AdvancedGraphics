@@ -1,96 +1,109 @@
 let Shaders = {};
-
+//Lab 11: Part A 1.
 Shaders.ShaderA = {
+    uniforms: {
+        'time': { type: 'f', value: 0.0}, 
+        'textureA': {  value: null }
+    },
     vertexShader:
         `varying vec2 vUv;
+        uniform float time;
+        uniform sampler2D textureA;
+
         void main() {
             vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            vec4 color = texture2D(textureA, vUv);
+            vec3 pos = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
         }`,
     fragmentShader:`
-    varying vec2 vUv;
+        varying vec2 vUv;
+        uniform float time;
+        uniform sampler2D textureA;
+        const float PI = 3.14159265358979;
 
-    
-       //local variable red
-       void main() {
-        float PI = 3.14159265359;
-        float index = vUv.x;
-    
-        vec3 greenRed = vec3(abs(cos(index*2.0)), abs(sin(index*1.5)), 0.0);
-        gl_FragColor = vec4( greenRed, 1.0 );    //alpha is 0.75
+        void main() {
+            
+
+          
+            vec4 color = texture2D(textureA, vUv);
+            color.r = 0.65;
+            color.g = 1.0-color.g;
+            color.b = 0.0;
+            color.a = 0.8;
+            gl_FragColor = vec4(color);
+            
         }`
 
-    };
-
-    Shaders.ShaderB = {
-        vertexShader:
+};
+//Lab 11: Part A 2.
+Shaders.ShaderB = {
+    uniforms: {
+        'time': { type: 'f', value: 0.0}, 
+        'textureA': {  value: null }
+    },
+    vertexShader:
         `varying vec2 vUv;
-        
+        uniform float time;
+        uniform sampler2D textureA;
+
         void main() {
             vUv = uv;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            vec4 color = texture2D(textureA, vUv);
+            vec3 pos = position;
+            pos.z += abs(sin(color.r *5.0));
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
         }`,
     fragmentShader:`
-    varying vec2 vUv;
-    const float PI = 3.14159265358979;
-    
-       //local variable red
-       void main() {
-        float indexX = vUv.x;
-    
-        vec3 greenRed = vec3(abs(cos(indexX*PI*15.0)), abs(sin(indexX*PI*15.0)), 0.0);
-        gl_FragColor = vec4( greenRed, 1.0 );
+        varying vec2 vUv;
+        uniform float time;
+	    uniform sampler2D textureA;
+        const float PI = 3.14159265358979;
+
+        void main() {
+            vec4 color = texture2D(textureA, vUv);
+            color.r = 0.65;
+            color.g = 1.0-color.g;
+            color.b = 0.0;
+            color.a = 0.8;
+            gl_FragColor = vec4(color);
+
         }`
-    };
+};
+//Lab 11: Part A 3.
+Shaders.ShaderC = {
+    uniforms: {
+        'time': { type: 'f', value: 0.0}, 
+        'textureA': {  value: null }
+    },
+    vertexShader:
+        `varying vec2 vUv;
+        uniform float time;
+        uniform sampler2D textureA;
 
-    Shaders.ShaderC = {
-        uniforms: {
-            'time': { type: 'f', value: 0.0}  
-          },
-        vertexShader:
-            `varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            vec4 color = texture2D(textureA, vUv);
+            vec3 pos = position;
+            pos.z += abs(sin(color.r *10.0+time*2.0));
 
-            //to facilitate sending data to fragment shader
-            void main() {
-                vUv = uv;
-                //sends the uv value to the fragment program
-                gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-        }`,
-        fragmentShader:
-            `varying vec2 vUv;
-            const float PI = 3.14159265358979;
-            uniform float time;
-            void main() {
-                float indexX = vUv.x;
-    
-                vec3 greenRed = vec3(abs(sin(indexX*time*15.0)), abs(cos(indexX*time*15.0)), 0.0);
-                gl_FragColor = vec4( greenRed, 1.0 );
-            }`
+            //Uncomment the below line to have nice effect
+            //pos.y += tan(color.r *10.0+time*2.0);
             
-    };
-    Shaders.ShaderD = {
-        uniforms: {
-            'time': { type: 'f', value: 0.0}  
-          },
-        vertexShader:
-            `varying vec2 vUv;
-
-            //to facilitate sending data to fragment shader
-            void main() {
-                vUv = uv;
-                //sends the uv value to the fragment program
-                gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( pos, 1.0 );
         }`,
-        fragmentShader:
-            `varying vec2 vUv;
-            const float PI = 3.14159265358979;
-            uniform float time;
-            void main() {
-                float indexX = vUv.x;
-                float indexY = vUv.y;
-    
-                vec3 greenRed = vec3(abs(sin(indexY*PI*15.0)), abs(cos(indexY*PI*15.0)), 0.0);
-                gl_FragColor = vec4( greenRed, abs(tan(indexY*time*1.5)) );
-            }`
-            
-    };
+    fragmentShader:
+        `varying vec2 vUv;
+        uniform float time;
+        const float PI = 3.14159265358979;
+	    uniform sampler2D textureA;
+
+        void main() {
+            vec4 color = texture2D(textureA, vUv);
+            color.r = 0.65;
+            color.g = 1.0-color.g;
+            color.b = 0.0;
+            color.a = 0.8;
+            gl_FragColor = vec4(color);
+        }`    
+};
