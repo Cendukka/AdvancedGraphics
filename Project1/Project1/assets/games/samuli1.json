@@ -1,0 +1,72 @@
+{
+
+    "boxFriction":0.65,
+    "boxRestitution":0.7,
+    "boxMass": 5,
+    "clicks": 1,
+    "box":  {
+        "0": {
+            "name": "box0",
+            "size": { "x" : 1,    "y" : 1,    "z" : 1   },
+            "color": "rgb(255, 0, 0)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : 0,    "y" : 0.5,  "z" : 0   }
+        },
+        "1": {
+            "name": "box1",
+            "size": { "x" : 1,    "y" : 1,    "z" : 1   },
+            "color": "rgb(0, 0, 255)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : 1.5,    "y" : 0.5,  "z" : 0   }
+        },
+        "2": {
+            "name": "box2",
+            "size": { "x" : 1,    "y" : 1,    "z" : 1   },
+            "color": "rgb(255, 0, 0)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : -1.5,    "y" : 0.5,  "z" : 0   }
+        },
+        "3": {
+            "name": "box3",
+            "size": { "x" : 1,    "y" : 1,    "z" : 1   },
+            "color": "rgb(0, 0, 255)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : -0.75,    "y" : 1.5,  "z" : 0   }
+        },
+        "4": {
+            "name": "box4",
+            "size": { "x" : 1,    "y" : 1,    "z" : 1   },
+            "color": "rgb(255, 0, 0)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : 0.75,    "y" : 1.5,  "z" : 0   }
+        },
+        "5": {
+            "name": "box5",
+            "size": { "x" : 1,    "y" : 1,    "z" : 1   },
+            "color": "rgb(0, 0, 255)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : 0,    "y" : 2.5,  "z" : 0   }
+        },
+        "6": {
+            "name": "yellowBox",
+            "size": { "x" : 4,    "y" : 4,    "z" : 4   },
+            "color": "rgb(255, 255, 0)", 
+            "transparency": "true", 
+            "opacity": "0.9",
+            "boxMass": 3,
+            "position":{ "x" : 0,    "y" : 5,  "z" : 0   }
+        }
+    }
+}

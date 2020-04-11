@@ -11,13 +11,21 @@
     <script src="../libs/dat.gui.min.js"></script>
     <script src="../libs/orbitControls.js"></script>
     <script src="../libs/rectAreaLightUniformsLib.js"></script>
-    <script src="../JS/Samuli_Fragment.js"></script>
-    <script src="../JS/Samuli.js"></script>
+    <script src="../libs/other/physijs/physi.js"></script>
+    <script src="../JS/samuli.js"></script>
     <meta charset="utf-8" />
     <title> Samuli Lehtonen </title>
 </head>
 
 <body>
-    
+    <div id="scoreBoard"style="background-color: #aaaaaa; width: 300px; height: 300px; position: fixed; top: 10px; left: 10px;">
+        <p id="instruPara"><b>Can you drop the Big yellow cube off the stage with given clicks? Click the red/blue boxes to make them disappear</b></p>
+        <p id="currentLevelpara" > Current Level: Level 1</p>
+        <p id="clicksPara" > Clicks: 0</p>
+        <p id="levelClearedPara" > Level cleared: 0</p>
+        <p id="resetsPara" > Resets: 0</p>
+        
+
+    </div>
 </body>
 </html>
